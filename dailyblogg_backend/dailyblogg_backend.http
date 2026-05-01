@@ -1,0 +1,6 @@
+@dailyblogg_backend_HostAddress = http://localhost:5081
+
+GET {{dailyblogg_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

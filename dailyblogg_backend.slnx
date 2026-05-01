@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="dailyblogg_backend/dailyblogg_backend.csproj" />
+  <Project Path="daily_blogg_Test/daily_blogg_Test.csproj" Id="59438a00-989d-44b6-8672-991b09372e27" />
+</Solution>
