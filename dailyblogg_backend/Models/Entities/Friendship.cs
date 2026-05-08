@@ -15,7 +15,7 @@ namespace dailyblogg_backend.Models.Entities
         public ApplicationUser Receiver { get; set; } = null!;
 
         public FriendshipStatus Status { get; set; } = FriendshipStatus.Pending;
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     }
     public enum FriendshipStatus
     {

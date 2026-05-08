@@ -7,7 +7,7 @@ namespace dailyblogg_backend.Services.PostServices
         Task<ApiResponse<PostResponseDTO?>> GetPostById(string userId, int postId);
         Task<ApiResponse<List<PostResponseDTO>>> GetAllPostsByName(string userId, string name);
         Task<ApiResponse<List<PostResponseDTO>>> GetAllPost(string userId);
-        Task<ApiResponse<List<PostResponseDTO>>> GetAllPostsByUserId(string userId);
+        Task<ApiResponse<List<PostResponseDTO>>> GetAllPostsByUserId(string currentUserId, string userId);
         Task<ApiResponse<List<PostResponseDTO>>> GetPostsByHashtag(string userId, string hashtagName);
         Task<ApiResponse<PostResponseDTO?>> CreatePost(CreatePostDTO post, string userId);
         Task<ApiResponse<PostResponseDTO?>> UpdatePost(string userId, int postId, UpdatePostDTO dto);

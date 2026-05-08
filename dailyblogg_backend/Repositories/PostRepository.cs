@@ -18,14 +18,21 @@ namespace dailyblogg_backend.Repositories
         public async Task Remove(T entity) => _context.Set<T>().Remove(entity);
         public async Task<IEnumerable<T>> GetPostsByUserIdAsync(string userId)
         {
-            return await _context.Set<T>()
-                .Where(p => p.UserId == userId)
-                .Include(p => p.User)
-                .Include(p => p.Comments).ThenInclude(c => c.User)
-                .Include(p => p.Likes).ThenInclude(l => l.User)
-                .Include(p => p.Hashtags)
-                .OrderByDescending(p => p.CreatedDate)
-                .ToListAsync();
+            try
+            {
+                return await _context.Set<T>()
+                    .Where(p => p.UserId == userId)
+                    .Include(p => p.User)
+                    .Include(p => p.Comments).ThenInclude(c => c.User)
+                    .Include(p => p.Likes).ThenInclude(l => l.User)
+                    .Include(p => p.Hashtags)
+                    .OrderByDescending(p => p.CreatedDate)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException($"An error occurred while retrieving posts for user {userId}: {ex.Message}", ex);
+            }
         }
         public async Task<T?> GetPostByIdAsync(int postId)
         {

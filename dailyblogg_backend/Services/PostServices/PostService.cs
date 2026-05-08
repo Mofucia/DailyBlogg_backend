@@ -214,15 +214,19 @@ namespace dailyblogg_backend.Services.PostServices
             return ApiResponse<List<PostResponseDTO>>.SuccessResult(result);
         }
 
-        public async Task<ApiResponse<List<PostResponseDTO>>> GetAllPostsByUserId(string userId)
+        public async Task<ApiResponse<List<PostResponseDTO>>> GetAllPostsByUserId(string currentUserId, string userId)
         {
             var posts = await _postRepo.GetPostsByUserIdAsync(userId);
+
+            if (posts == null)
+                return ApiResponse<List<PostResponseDTO>>.FailureResult("can't find posts");
+
             var result = new List<PostResponseDTO>();
 
             foreach (var p in posts)
             {
                 var likeCount = await _likeRepo.LikeCountForPost(p.Id);
-                var hasLiked = await _likeRepo.HasLikedByCurrentUser(p.Id, userId);
+                var hasLiked = await _likeRepo.HasLikedByCurrentUser(p.Id, currentUserId);
 
                 result.Add(new PostResponseDTO
                 {
@@ -330,7 +334,10 @@ namespace dailyblogg_backend.Services.PostServices
                 LikeCount = 0,
                 HasLikedByCurrentUser = false,
                 Comments = new List<CommentResponseDTO>(),
-                Hashtags = new List<HashtagResponseDTO>()
+                Hashtags = hashtags.Select(tagName => new HashtagResponseDTO
+                {
+                    HashtagName = tagName
+                }).ToList()
             };
 
             return ApiResponse<PostResponseDTO?>.SuccessResult(dto);

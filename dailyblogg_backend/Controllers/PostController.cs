@@ -22,14 +22,14 @@ namespace dailyblogg_backend.Controllers
 
         [Authorize]
         [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetAllPostsByUserId()
+        public async Task<IActionResult> GetAllPostsByUserId(string userId)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (userId == null)
+            if (currentUserId == null)
                 return Unauthorized();
 
-            var posts = await _postService.GetAllPostsByUserId(userId);
+            var posts = await _postService.GetAllPostsByUserId(currentUserId, userId);
             if (!posts.Success)
                 return BadRequest(posts);
             return Ok(posts.Data);
@@ -45,7 +45,7 @@ namespace dailyblogg_backend.Controllers
 
         [Authorize]
         [HttpPost("create")]
-        public async Task<IActionResult> CreatePost([FromBody] CreatePostDTO dto)
+        public async Task<IActionResult> CreatePost([FromForm] CreatePostDTO dto)
         {
             //user verification
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -60,7 +60,7 @@ namespace dailyblogg_backend.Controllers
         }
         [Authorize]
         [HttpPut("{postId}/update")]
-        public async Task<IActionResult> UpdatePost(int postId,[FromBody] UpdatePostDTO dto)
+        public async Task<IActionResult> UpdatePost(int postId,[FromForm] UpdatePostDTO dto)
         {
             //user verification
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

@@ -16,12 +16,13 @@ namespace dailyblogg_backend.Repositories
             _userManager = userManager;
         }
 
-        public async Task<T> CreateAsync(T entity,string password)
+        public async Task<T> CreateAsync(T entity, string password)
         {
-            var result = await _userManager.CreateAsync(entity,password);
+            var result = await _userManager.CreateAsync(entity, password);
             if (!result.Succeeded)
             {
-                throw new InvalidOperationException();
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new InvalidOperationException($"User creation failed: {errors}");
             }
             return entity;
         }

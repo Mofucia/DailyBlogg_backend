@@ -30,7 +30,7 @@ namespace dailyblogg_backend.Controllers
                 return BadRequest(result);
 
             // return the notifications payload
-            return Ok(result.Data);
+            return Ok(result);
         }
         [Authorize]
         [HttpDelete("delete/{notificationId}")]

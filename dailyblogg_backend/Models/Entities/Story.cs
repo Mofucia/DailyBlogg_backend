@@ -8,7 +8,7 @@ namespace dailyblogg_backend.Models.Entities
         public string? Content { get; set; }
         public string StoryUrl { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
         //Foreign keys
         public string UserId { get; set; } = default!;

@@ -20,6 +20,12 @@ namespace dailyblogg_backend.Repositories
         }
         public async Task<List<T>> AllActiveStory(DateTime storyExpireDate)
         {
+            Console.WriteLine($"Expire Date Threshold: {storyExpireDate}");
+            var allStories = await _context.Set<Story>().Select(s => s.CreatedDate).ToListAsync();
+            foreach (var date in allStories)
+            {
+                Console.WriteLine($"Story Date in DB: {date}");
+            }
             return await _context.Set<T>()
                                  .Include(p => p.User)
                                  .Where(p => p.CreatedDate >= storyExpireDate) // Only get story that is not expire

@@ -5,7 +5,7 @@ namespace dailyblogg_backend.Models.Entities
     public class Like
     {
         public int Id { get; set; }
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         // Foreign keys
         public int PostId { get; set; }
         public string UserId { get; set; } = string.Empty;

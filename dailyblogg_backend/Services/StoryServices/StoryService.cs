@@ -36,7 +36,7 @@ namespace dailyblogg_backend.Services.StoryServices
         }
         public async Task<ApiResponse<List<StoryResponseDTO>>> GetAllActiveStory()
         {
-            var storyExpireDate = DateTime.Now.AddHours(-24);
+            var storyExpireDate = DateTime.UtcNow.AddHours(-24);
             var stories = await _storyRepo.AllActiveStory(storyExpireDate);
             if (stories == null)
                 return ApiResponse<List<StoryResponseDTO>>.FailureResult("Can't find any active story");
@@ -106,7 +106,7 @@ namespace dailyblogg_backend.Services.StoryServices
             {
                 Content = dto.Content,
                 StoryUrl= imageUrl,
-                CreatedDate = DateTime.Now,
+                CreatedDate = DateTime.UtcNow,
                 UserId = userId,
                 Name = user?.Name ?? "Unknown"
             };

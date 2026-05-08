@@ -2,6 +2,7 @@
 using dailyblogg_backend.Data;
 using dailyblogg_backend.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 public static class DbInitializer
 {
@@ -30,30 +31,33 @@ public static class DbInitializer
             var Mockusers = userFaker.Generate(15);
             await context.Users.AddRangeAsync(Mockusers);
             await context.SaveChangesAsync();
+        }
+        
+        var users = await context.Users.ToListAsync();
 
-            // (Child) Friendship
+        if (!await context.Friendships.AnyAsync() && users.Any())
+        {
             var friendshipFaker = new Faker<Friendship>()
-                .RuleFor(f => f.RequestorId, f => f.PickRandom(Mockusers).Id)
+                .RuleFor(f => f.RequestorId, f => f.PickRandom(users).Id)
                 .RuleFor(f => f.ReceiverId, (f, friendship) =>
-                    f.PickRandom(Mockusers.Where(u => u.Id != friendship.RequestorId)).Id) //This is so that the user doens't pick themselves as a friend
+                    f.PickRandom(users.Where(u => u.Id != friendship.RequestorId)).Id) //This is so that the user doens't pick themselves as a friend
                 .RuleFor(f => f.Status, f => f.PickRandom(FriendshipStatus.Accepted, FriendshipStatus.Pending));
-
             var friendships = friendshipFaker.Generate(10);
             await context.Friendships.AddRangeAsync(friendships);
+        }
 
-            // (Child) Notification
+        if (!await context.Notifications.AnyAsync() && users.Any())
+        {
             var notificationFaker = new Faker<Notification>()
-                .RuleFor(n => n.UserId, f => f.PickRandom(Mockusers).Id)
+                .RuleFor(n => n.UserId, f => f.PickRandom(users).Id)
                 .RuleFor(n => n.Message, f => f.Lorem.Sentence())
                 .RuleFor(n => n.IsRead, f => f.Random.Bool())
                 .RuleFor(n => n.CreatedAt, f => f.Date.Recent(7));
 
             var notifications = notificationFaker.Generate(30);
             await context.Notifications.AddRangeAsync(notifications);
-
             await context.SaveChangesAsync();
         }
-        var users = await context.Users.ToListAsync();
 
         //Post
         if (!await context.Posts.AnyAsync() && users.Any())
@@ -70,10 +74,15 @@ public static class DbInitializer
             .RuleFor(p => p.Likes, f => new HashSet<Like>())
             .RuleFor(p => p.Hashtags, f => new HashSet<Hashtag>());
 
-            var posts = postFaker.Generate(30); // Create 30 posts
-            await context.Posts.AddRangeAsync(posts);
+            var Mockposts = postFaker.Generate(30); // Create 30 posts
+            await context.Posts.AddRangeAsync(Mockposts);
             await context.SaveChangesAsync();
+        }
 
+        var posts = await context.Posts.ToListAsync();
+
+        if(!await context.Comments.AnyAsync() && users.Any())
+        {
             var commentFaker = new Faker<Comment>()
                 .RuleFor(c => c.Text, f => f.Lorem.Sentence())
                 .RuleFor(c => c.CreatedDate, f => f.Date.Recent(7))
@@ -82,8 +91,9 @@ public static class DbInitializer
 
             var comments = commentFaker.Generate(100);
             await context.Comments.AddRangeAsync(comments);
-
-            // (Child) Like
+        }
+        if (!await context.Likes.AnyAsync() && users.Any())
+        {
             // Using Loops because we don't want a user to like a post twice or more
             var likes = new List<Like>();
             for (int i = 0; i < 50; i++)
@@ -101,8 +111,8 @@ public static class DbInitializer
             await context.SaveChangesAsync();
         }
 
-        //Story
-        if (!await context.Stories.AnyAsync() && users.Any())
+            //Story
+            if (!await context.Stories.AnyAsync() && users.Any())
         {
             var storyFaker = new Faker<Story>()
             .RuleFor(s => s.Name, f => f.Person.FirstName) // Random Display name
@@ -114,6 +124,46 @@ public static class DbInitializer
             var stories = storyFaker.Generate(15);
             await context.Stories.AddRangeAsync(stories);
             await context.SaveChangesAsync();
+        }
+
+        //hashtag
+        if (!await context.Hashtags.AnyAsync())
+        {
+            var hashtagNames = new[] { "dotnet", "csharp", "react", "programming", "dailyblogg", "backend", "fullstack" };
+
+            var hashtags = hashtagNames.Select(name => new Hashtag
+            {
+                HashtagName = name
+            }).ToList();
+
+            await context.Hashtags.AddRangeAsync(hashtags);
+            await context.SaveChangesAsync();
+
+            // Liên kết Hashtag vào Posts (Mối quan hệ Many-to-Many)
+            var allPosts = await context.Posts.Include(p => p.Hashtags).ToListAsync();
+            var allHashtags = await context.Hashtags.ToListAsync();
+
+            if (allPosts.Any() && allHashtags.Any())
+            {
+                var random = new Random();
+                foreach (var post in allPosts)
+                {
+                    // Chọn ngẫu nhiên 1-3 hashtag từ danh sách
+                    var tagsToAdd = allHashtags
+                        .OrderBy(x => Guid.NewGuid())
+                        .Take(random.Next(1, 4))
+                        .ToList();
+
+                    foreach (var tag in tagsToAdd)
+                    {
+                        // Thêm trực tiếp vào Collection của Post
+                        post.Hashtags.Add(tag);
+                    }
+                }
+
+                // Lưu lại sự thay đổi của các thực thể Post
+                await context.SaveChangesAsync();
+            }
         }
     }
 }

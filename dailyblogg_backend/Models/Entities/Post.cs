@@ -8,7 +8,7 @@ namespace dailyblogg_backend.Models.Entities
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string? ImageUrl { get; set; }
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
         // Foreign key
         public string UserId { get; set; } = default!;
